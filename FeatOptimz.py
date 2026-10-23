@@ -9,32 +9,20 @@ from lightgbm import LGBMRegressor
 from sklearn.model_selection import train_test_split
 import optuna
 
-path = 'C:/Users/rt2sa/Downloads/parkinsons+telemonitoring/parkinsons_updrs.data' # Update this path with the actual local/remote path to the data you wish to analyze
+path = 'path_to_your_file' # Update this path with the actual local/remote path to the data you wish to analyze
 data = pd.read_csv(path)
 
 # Penalty factor dictates how much each additional feature should be penalized
-# It is raised to the penalty factor (e.g. if pf = 1.5, then 2 features would be penalized by 2^1.5 = 2.828, so the
-# hybrid score would be 0.3535 of the original R2)
 penalty_factor = 2
 
 # separate out target var and drop columns
-tgt = data['HNR']
-data = data.drop(columns=['HNR', 'subject#', 'test_time'])
-data = data.rename(columns={
-    'Jitter:RAP':'Jitter_RAP',
-    'Jitter:PPQ5':'Jitter_PPQ5',
-    'Jitter:DDP':'Jitter_DDP',
-    'Shimmer:APQ3':'Shimmer_APQ3',
-    'Shimmer:APQ5':'Shimmer_APQ5',
-    'Shimmer:APQ11':'Shimmer_APQ11',
-    'Jitter(%)':'Jitter_pct',
-    'Shimmer:DDA':'Shimmer_DDA',
-    'Jitter(Abs)':'Jitter_Abs',
-    'Shimmer(dB)':'Shimmer_dB'
-})
+tgt = data['target']
+data = data.drop(columns=['target', 'col_to_drop', ...])
 
 print(data.columns)
+
 # split data into trainng, validation/optimization, and test sets
+# 50% training data, 25% validation/optimization, 25% testing
 train, valid, tgt_train, tgt_valid = train_test_split(data, tgt, test_size=0.5, random_state=42)
 valid, test, tgt_valid, tgt_test = train_test_split(valid, tgt_valid, test_size=0.5, random_state=42)
 
@@ -43,6 +31,7 @@ def r2(model, X, y):
     preds = model.predict(X)
     return 1 - (np.sum((y - preds) ** 2) / np.sum((y - np.mean(y)) ** 2))
 
+# returns h_score, a hybridized score that combines r2 and number of features in a geometric sum
 def h_score(r2, feats_len, max_num_feats, pf):
     return (1-r2)**2+((feats_len**pf)/max_num_feats)**2
 
