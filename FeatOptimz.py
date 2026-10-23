@@ -18,9 +18,10 @@ penalty_factor = 1.5
 
 # separate out target var and drop columns
 tgt = data['target']
-data = data.drop(columns=['target', 'other_column_to_drop'])
+data = data.drop(columns=['target', 'other_column_to_drop', ...])
 
 # split data into trainng, validation/optimization, and test sets
+# splits initial dataset into 50% training data, 25% validation data and 25% test data
 train, valid, tgt_train, tgt_valid = train_test_split(data, tgt, test_size=0.5, random_state=42)
 valid, test, tgt_valid, tgt_test = train_test_split(valid, tgt_valid, test_size=0.5, random_state=42)
 
